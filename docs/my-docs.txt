@@ -1,0 +1,46 @@
+Nov 1st, 2024 - 21:45 IST
+
+Problems:
+- Research secure key generation and storage on mobile hardware.
+- Develop a prototype for cloud backup encryption and storage.
+- Key Rotation and passkeys
+
+Modules:
+- Secure Key Generation
+- Secure Enclave Research with React Native
+- Cloud Backup Research (examples: Metamask, Rainbow)
+- Other Modes of Backup, and key storage
+- Key Rotation
+- Passkeys
+- Reading about compliance (FIPS 140-2/3)
+
+IOS:
+- Two ways to store the keys: - using the keychain, and using the secure enclave, the con of using secure enclare is the key will only be available on that particular device and will not be exportable
+
+Android:
+- Two ways to store these keys: using Android Keystore System, and using the TEE, or Secure Elements.
+
+Important Thing to keep in mind, while in production:
+- Disable logging
+- Using constant time algorithms
+- Monitoring and Limiting the rate of cryptographic operations to prevent analysis.
+- Reduce Attack Surface, by limiting the number of functions that have access of the key
+- Implement access control and use authentication for key access (biometrics, and passcodes) 
+
+
+Notes:
+- The Library used for generating the edDSA should ideally use CSPRNGs for randomness.
+- Should use trusted libraries, like, IOS has CryptoKit 
+
+Recommendations:
+- Maci:
+    - Add Invalided Keys Module in MACI for supporting Key Rotation.
+
+Tasks for me in mind:
+- Try out the key storage on IOS using Keychain
+- Try out the key storage on IOS using Secure Enclave
+- Try out the key storage on Android using Android Keystore System
+- Try out the key storage on Android using Secure Enclave
+- Have a meeting with ctrl3 for understanding how can we implement Key Rotation in MACI
+- Have a meeting with cedoor for understanding how we can implement key rotation in Semaphores and in general what would be needed in the mobile app for it to happen.
+- Idea: What about separating the public key which is used by dapps like maci with the key used to sign transactions (like votes on maci). For example, we could generate two private keys, and get the public keys for both of these, and then use the public key of the first in the dapp (maci), and then either create a smart contract, that keeps track of the owner key of this public key, i.e. the second key, or use a server with the signature of the first key marking second key as owner, and then discarding the private key of the first key, and using the second key for signing transactions, now the second key can sign a transaction marking a third key as the owner of the first key, at the time of key rotation, and then discard the second key.  (Note: Do we need nonce here as the second key might sign something after being invalidated)
