@@ -29,9 +29,22 @@
 		D32CCAD52CD566AD00B8A9BB /* testing-ios-app-1UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "testing-ios-app-1UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D32CCAE92CD5790700B8A9BB /* Exceptions for "testing-ios-app-1" folder in "testing-ios-app-1" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D32CCABA2CD566AC00B8A9BB /* testing-ios-app-1 */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D32CCABD2CD566AC00B8A9BB /* testing-ios-app-1 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D32CCAE92CD5790700B8A9BB /* Exceptions for "testing-ios-app-1" folder in "testing-ios-app-1" target */,
+			);
 			path = "testing-ios-app-1";
 			sourceTree = "<group>";
 		};
@@ -399,6 +412,8 @@
 				DEVELOPMENT_TEAM = V5TJ3Q94MQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "testing-ios-app-1/Info.plist";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "This app requires access to Face ID for authentication purposes.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -428,6 +443,8 @@
 				DEVELOPMENT_TEAM = V5TJ3Q94MQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "testing-ios-app-1/Info.plist";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "This app requires access to Face ID for authentication purposes.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
