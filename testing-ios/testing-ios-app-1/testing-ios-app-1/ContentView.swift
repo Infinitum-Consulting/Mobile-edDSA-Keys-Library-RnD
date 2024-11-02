@@ -11,12 +11,15 @@ import Security
 import LocalAuthentication
 
 struct ContentView: View {
+    @State var scanResult = "No QR code detected"
+    @State var scanning = false
+    
     var body: some View {
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
-            Text("Hello, world!")
+            Text("Hello World")
             Button("Show", action: click)
                 .padding(.horizontal)
                 .background(Color.red)
@@ -26,6 +29,12 @@ struct ContentView: View {
                 .padding(.horizontal)
                 .background(Color.red)
                 .foregroundColor(.white)
+            Button("Scan", action: { scanning.toggle() })
+            if scanning {
+                QrCodeScannerView(scanning: $scanning, scanResult: $scanResult)
+            } else {
+                Text("Scanning...")
+            }
         }
         .padding()
     }
