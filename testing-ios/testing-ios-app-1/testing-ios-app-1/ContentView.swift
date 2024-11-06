@@ -9,10 +9,24 @@ import SwiftUI
 import CryptoKit
 import Security
 import LocalAuthentication
+import WebKit
+
+struct Message: Encodable {
+        var action: String
+}
+
+struct GetIdResponse: Encodable, Decodable {
+    var action: String
+    var id: String
+}
 
 struct ContentView: View {
     @State var scanResult = "No QR code detected"
     @State var scanning = false
+    @ObservedObject var websocket = Websocket()
+
+    
+    var message = Message(action: "get-id")
     
     var body: some View {
         VStack {
@@ -20,6 +34,13 @@ struct ContentView: View {
                 .imageScale(.large)
                 .foregroundStyle(.tint)
             Text("Hello World")
+            Button("Get Id", action: {
+                websocket.sendMsg(message)
+            })
+                .padding(.horizontal)
+                .background(Color.red)
+                .foregroundColor(.white)
+                .padding()
             Button("Show", action: click)
                 .padding(.horizontal)
                 .background(Color.red)
@@ -132,6 +153,85 @@ struct ContentView: View {
         
         print(key.publicKey)
         print(key.rawRepresentation)
+    }
+}
+
+
+class Websocket: ObservableObject {
+    @Published var messages = [String]()
+    
+    private var webSocketTask: URLSessionWebSocketTask?
+    
+    init() {
+        self.connect()
+    }
+    
+    private func connect() {
+        guard let url = URL(string: "wss://9fbd-2405-201-6819-2010-784e-afcb-5318-7b75.ngrok-free.app") else { return }
+        let request = URLRequest(url: url)
+        print("h")
+        webSocketTask = URLSession.shared.webSocketTask(with: request)
+        print("he")
+        webSocketTask?.resume()
+        print("her")
+        receiveMessage()
+        print("here")
+    }
+    
+    private func receiveMessage() {
+        webSocketTask?.receive { result in
+            print("Received: \(result)")
+            switch result {
+            case .failure(let error):
+                print(error.localizedDescription)
+            case .success(let message):
+                switch message {
+                case .string(let text):
+                    self.formatReceivedMessage(text)
+                case .data(let data):
+                    // Handle binary data
+                    break
+                @unknown default:
+                    break
+                }
+            }
+        }
+    }
+    
+    func formatReceivedMessage(_ msg: String) {
+        let jsonData = Data(msg.utf8)
+        let decoder = JSONDecoder()
+
+        do {
+            let res = try decoder.decode(GetIdResponse.self, from: jsonData)
+            print(res)
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+//        self.messages.append(msg)
+    }
+    
+    func sendMsg(_ msg: Message) {
+        let encoder = JSONEncoder()
+        
+        do {
+            let data = try encoder.encode(msg)
+            let messageStr = String(data: data, encoding: .utf8)!
+            
+            sendMessage(messageStr)
+        } catch {
+            
+        }
+    }
+    
+    func sendMessage(_ message: String) {
+        guard let data = message.data(using: .utf8) else { return }
+        webSocketTask?.send(.string(message)) { error in
+            if let error = error {
+                print(error.localizedDescription)
+            }
+        }
     }
 }
 
