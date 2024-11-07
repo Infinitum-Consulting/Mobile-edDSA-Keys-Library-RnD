@@ -8,21 +8,10 @@
 import SwiftUI
 import AVFoundation
 
-struct QrCodeScannerView: View {
-    @Binding var scanning: Bool
-    @Binding var scanResult: String
+struct QrCodeScannerView: UIViewControllerRepresentable {
+    var onScan: (String) -> Void
     
-    var body: some View {
-        // Create a QR code scanner view
-        QrCodeScanner(result: $scanResult, scanning: $scanning)
-    }
-}
-
-struct QrCodeScanner: UIViewControllerRepresentable {
-    @Binding var result: String
-    @Binding var scanning: Bool
-    
-    func makeUIViewController(context: UIViewControllerRepresentableContext<QrCodeScanner>) -> UIViewController {
+    func makeUIViewController(context: UIViewControllerRepresentableContext<QrCodeScannerView>) -> UIViewController {
         // Create a QR code scanner
         let scannerViewController = QRScannerController()
         scannerViewController.delegate = makeCoordinator()
@@ -30,13 +19,14 @@ struct QrCodeScanner: UIViewControllerRepresentable {
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator($result, $scanning)
+        Coordinator(onScan)
     }
     
-    func updateUIViewController(_ uiViewController: UIViewController, context: UIViewControllerRepresentableContext<QrCodeScanner>) {
+    func updateUIViewController(_ uiViewController: UIViewController, context: UIViewControllerRepresentableContext<QrCodeScannerView>) {
         // Update the view controller
     }
 }
+
 class QRScannerController: UIViewController {
     var captureSession = AVCaptureSession()
     var videoPreviewLayer: AVCaptureVideoPreviewLayer?
@@ -92,18 +82,24 @@ class QRScannerController: UIViewController {
 }
 
 class Coordinator: NSObject, AVCaptureMetadataOutputObjectsDelegate {
-    @Binding var scanResult: String
-    @Binding var scanning: Bool
+    var onScan: (String) -> Void
+    var lastScanTime: TimeInterval
 
-    init(_ scanResult: Binding<String>, _ scanning: Binding<Bool>) {
-        self._scanResult = scanResult
-        self._scanning = scanning
+    init(_ onScan: @escaping (String) -> Void) {
+        self.onScan = onScan
+        self.lastScanTime = 0.0
     }
 
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        let currentTime = NSDate().timeIntervalSince1970
+        if currentTime - lastScanTime < 0.5 {
+            return
+        }
+        lastScanTime = currentTime
+        
         // Check if the metadataObjects array is not nil and it contains at least one object.
         if metadataObjects.count == 0 {
-            scanResult = "No QR code detected"
+//            scanResult = "No QR code detected"
             return
         }
 
@@ -112,10 +108,7 @@ class Coordinator: NSObject, AVCaptureMetadataOutputObjectsDelegate {
 
         if metadataObj.type == AVMetadataObject.ObjectType.qr,
            let result = metadataObj.stringValue {
-
-            scanResult = result
-            print(scanResult)
-            scanning = false
+            onScan(result)
         }
     }
 }

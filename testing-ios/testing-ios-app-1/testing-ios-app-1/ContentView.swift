@@ -11,13 +11,16 @@ import Security
 import LocalAuthentication
 import WebKit
 
-struct Message: Encodable {
-        var action: String
-}
+extension Data {
+    struct HexEncodingOptions: OptionSet {
+        let rawValue: Int
+        static let upperCase = HexEncodingOptions(rawValue: 1 << 0)
+    }
 
-struct GetIdResponse: Encodable, Decodable {
-    var action: String
-    var id: String
+    func hexEncodedString(options: HexEncodingOptions = []) -> String {
+        let format = options.contains(.upperCase) ? "%02hhX" : "%02hhx"
+        return self.map { String(format: format, $0) }.joined()
+    }
 }
 
 struct ContentView: View {
@@ -52,7 +55,7 @@ struct ContentView: View {
                 .foregroundColor(.white)
             Button("Scan", action: { scanning.toggle() })
             if scanning {
-                QrCodeScannerView(scanning: $scanning, scanResult: $scanResult)
+                QrCodeScannerView(onScan: onScan)
             } else {
                 Text("Scanning...")
             }
@@ -60,7 +63,50 @@ struct ContentView: View {
         .padding()
     }
     
-    func retrieve() {
+    func onScan(_ result: String) {
+        // TODO: validate the scan result here
+        print(result)
+        
+        let jsonData = Data(result.utf8)
+        let decoder = JSONDecoder()
+
+        do {
+            let (privateKeyData, status) = getStoredKey()
+            
+            if status == errSecSuccess {
+                let retrievedPrivateKey = try Curve25519.Signing.PrivateKey(rawRepresentation: privateKeyData)
+                let publicKey = Data(base64Encoded: retrievedPrivateKey.publicKey.rawRepresentation.base64EncodedString())!
+                let res = try decoder.decode(QrCodeData.self, from: jsonData)
+                let request = ConnectRequest(action: "connect", peerId: res.webId, publicKey: publicKey.hexEncodedString())
+                
+                let encoder = JSONEncoder()
+                
+                let data = try encoder.encode(request)
+                let messageStr = String(data: data, encoding: .utf8)!
+                
+                websocket.sendMessage(messageStr)
+                
+                print(request)
+                
+                print("Private key retrieved successfully.")
+                
+                let message = "Hello, World!".data(using: .utf8)!
+                let signature = try retrievedPrivateKey.signature(for: message)
+                print(signature.base64EncodedString())
+                // Use `retrievedPrivateKey` as needed
+            } else if status == errSecItemNotFound {
+                print("Private key not found in the Keychain.")
+            } else {
+                print("Error retrieving private key: \(status)")
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
+
+        scanning = false
+    }
+    
+    func getStoredKey() -> (Data, OSStatus) {
         let tag = "consulting.infinitum.testing-ios-app-1.privatekey".data(using: .utf8)!
         
         let context = LAContext()
@@ -74,22 +120,37 @@ struct ContentView: View {
             kSecReturnData as String:       true,
             kSecUseAuthenticationContext as String: context,
         ]
+        var item: CFTypeRef?
+        let status = SecItemCopyMatching(getQuery as CFDictionary, &item)
+        
+        if status == errSecSuccess {
+            if let privateKeyData = item as? Data {
+                // Reconstruct the private key from the data
+                return (privateKeyData, status)
+                // Use `retrievedPrivateKey` as needed
+            }
+        } else if status == errSecItemNotFound {
+            print("Private key not found in the Keychain.")
+        } else {
+            print("Error retrieving private key: \(status)")
+        }
+        return (Data(), status)
+    }
+
+    func retrieve() {
         do {
-            var item: CFTypeRef?
-            let status = SecItemCopyMatching(getQuery as CFDictionary, &item)
+            let (privateKeyData, status) = getStoredKey()
             
             if status == errSecSuccess {
-                if let privateKeyData = item as? Data {
-                    // Reconstruct the private key from the data
-                    let retrievedPrivateKey = try Curve25519.Signing.PrivateKey(rawRepresentation: privateKeyData)
-                    print(retrievedPrivateKey.publicKey)
-                    print("Private key retrieved successfully.")
-                    
-                    let message = "Hello, World!".data(using: .utf8)!
-                    let signature = try retrievedPrivateKey.signature(for: message)
-                    print(signature.base64EncodedString())
-                    // Use `retrievedPrivateKey` as needed
-                }
+                let retrievedPrivateKey = try Curve25519.Signing.PrivateKey(rawRepresentation: privateKeyData)
+                let data = Data(base64Encoded: retrievedPrivateKey.publicKey.rawRepresentation.base64EncodedString())!
+                print(data.hexEncodedString())
+                print("Private key retrieved successfully.")
+                
+                let message = "Hello, World!".data(using: .utf8)!
+                let signature = try retrievedPrivateKey.signature(for: message)
+                print(signature.base64EncodedString())
+                // Use `retrievedPrivateKey` as needed
             } else if status == errSecItemNotFound {
                 print("Private key not found in the Keychain.")
             } else {
@@ -153,85 +214,6 @@ struct ContentView: View {
         
         print(key.publicKey)
         print(key.rawRepresentation)
-    }
-}
-
-
-class Websocket: ObservableObject {
-    @Published var messages = [String]()
-    
-    private var webSocketTask: URLSessionWebSocketTask?
-    
-    init() {
-        self.connect()
-    }
-    
-    private func connect() {
-        guard let url = URL(string: "wss://9fbd-2405-201-6819-2010-784e-afcb-5318-7b75.ngrok-free.app") else { return }
-        let request = URLRequest(url: url)
-        print("h")
-        webSocketTask = URLSession.shared.webSocketTask(with: request)
-        print("he")
-        webSocketTask?.resume()
-        print("her")
-        receiveMessage()
-        print("here")
-    }
-    
-    private func receiveMessage() {
-        webSocketTask?.receive { result in
-            print("Received: \(result)")
-            switch result {
-            case .failure(let error):
-                print(error.localizedDescription)
-            case .success(let message):
-                switch message {
-                case .string(let text):
-                    self.formatReceivedMessage(text)
-                case .data(let data):
-                    // Handle binary data
-                    break
-                @unknown default:
-                    break
-                }
-            }
-        }
-    }
-    
-    func formatReceivedMessage(_ msg: String) {
-        let jsonData = Data(msg.utf8)
-        let decoder = JSONDecoder()
-
-        do {
-            let res = try decoder.decode(GetIdResponse.self, from: jsonData)
-            print(res)
-        } catch {
-            print(error.localizedDescription)
-        }
-        
-//        self.messages.append(msg)
-    }
-    
-    func sendMsg(_ msg: Message) {
-        let encoder = JSONEncoder()
-        
-        do {
-            let data = try encoder.encode(msg)
-            let messageStr = String(data: data, encoding: .utf8)!
-            
-            sendMessage(messageStr)
-        } catch {
-            
-        }
-    }
-    
-    func sendMessage(_ message: String) {
-        guard let data = message.data(using: .utf8) else { return }
-        webSocketTask?.send(.string(message)) { error in
-            if let error = error {
-                print(error.localizedDescription)
-            }
-        }
     }
 }
 
