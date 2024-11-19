@@ -210,8 +210,7 @@ struct ContentView: View {
         } else {
             print("Error storing private key: \(status)")
         }
-        
-        
+
         print(key.publicKey)
         print(key.rawRepresentation)
     }
