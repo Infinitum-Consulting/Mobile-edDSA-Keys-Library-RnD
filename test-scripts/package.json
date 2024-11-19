@@ -1,0 +1,14 @@
+{
+  "name": "test-scripts",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "maci-domainobjs": "^2.4.0"
+  }
+}
