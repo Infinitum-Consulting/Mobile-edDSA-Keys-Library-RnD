@@ -1,4 +1,7 @@
-import { Keypair } from "maci-domainobjs";
+import { Keypair, VerifyingKey } from "maci-domainobjs";
+import { verifySignature } from "@zk-kit/eddsa-poseidon";
+
+verifySignature("Hello", "", "");
 
 const key = new Keypair();
 
