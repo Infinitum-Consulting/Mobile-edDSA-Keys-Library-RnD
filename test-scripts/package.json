@@ -9,6 +9,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@zk-kit/eddsa-poseidon": "^1.1.0",
     "maci-domainobjs": "^2.4.0"
   }
 }
