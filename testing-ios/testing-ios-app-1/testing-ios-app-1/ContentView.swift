@@ -26,7 +26,7 @@ extension Data {
 struct ContentView: View {
     @State var scanResult = "No QR code detected"
     @State var scanning = false
-    @ObservedObject var websocket = Websocket()
+    // @ObservedObject var websocket = Websocket()
 
     
     var message = Message(action: "get-id")
@@ -38,7 +38,7 @@ struct ContentView: View {
                 .foregroundStyle(.tint)
             Text("Hello World")
             Button("Get Id", action: {
-                websocket.sendMsg(message)
+                // websocket.sendMsg(message)
             })
                 .padding(.horizontal)
                 .background(Color.red)
@@ -84,7 +84,7 @@ struct ContentView: View {
                 let data = try encoder.encode(request)
                 let messageStr = String(data: data, encoding: .utf8)!
                 
-                websocket.sendMessage(messageStr)
+                // websocket.sendMessage(messageStr)
                 
                 print(request)
                 
