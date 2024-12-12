@@ -1,0 +1,44 @@
+Dec 11, 2024 - 12:09 IST
+
+1. Android Keystore system 
+
+Key chain API 
+Android Keystore provider
+
+Use the KeyChain API when you want system-wide credentials. When an app requests the use of any credential through the KeyChain API, users can choose, through a system-provided UI, which of the installed credentials an app can access. This lets several apps use the same set of credentials with user consent.
+
+Use the Android Keystore provider to let an individual app store its own credentials, which only that app can access. This provides a way for apps to manage credentials that only they can use while providing the same security benefits that the KeyChain API provides for system-wide credentials. This method doesn't require the user to select the credentials.
+
+ Open Source Custodial Wallet - krakenfx
+
+
+Dec 12, 2024 - 12:09 IST
+
+Keystore provides the following categories of operations:
+
+Key generation
+Import and export of asymmetric keys (no key wrapping)
+Import of raw symmetric keys (no key wrapping)
+Asymmetric encryption and decryption with appropriate padding modes
+Asymmetric signing and verification with digesting and appropriate padding modes
+Symmetric encryption and decryption in appropriate modes, including an AEAD mode
+Generation and verification of symmetric message authentication codes
+
+## Another Method of storing the keys 
+ 
+Hardware-Backed Trusted Execution Environment (TEE)
+
+What it is: Use a Secure Element (SE) or Trusted Execution Environment (TEE) to store keys securely at the hardware level.
+
+Why it's secure:
+The keys never leave the hardware and are isolated from the OS.
+Access to keys is only allowed for cryptographic operations.
+Example: Use StrongBox with the Keystore to leverage hardware-backed key storage
+
+
+Alternatives of storing keys in android keystore system 
+- Encrypted Shared Preferences
+- Database Encryption
+- File Encryption
+- Cloud Storage
+- Native Encryption
