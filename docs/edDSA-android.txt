@@ -10,6 +10,48 @@ Use the KeyChain API when you want system-wide credentials. When an app requests
 Use the Android Keystore provider to let an individual app store its own credentials, which only that app can access. This provides a way for apps to manage credentials that only they can use while providing the same security benefits that the KeyChain API provides for system-wide credentials. This method doesn't require the user to select the credentials.
 
  Open Source Custodial Wallet - krakenfx
+ https://github.com/krakenfx/wallet/blob/main/src/screens/Settings/walletBackup/components/WalletBackupVerify.tsx
+
+Keychain interaction as resetting the generic password or verifying it 
+https://github.com/krakenfx/wallet/blob/main/src/secureStore/keychain/index.ts 
+
+Generating public-private key using keystore in android 
+https://yggr.medium.com/how-to-generate-public-private-key-in-android-7f3e244c0fd8
+
+Secured keychain provider for kraken wallet 
+https://github.com/krakenfx/wallet/blob/main/src/secureStore/SecuredKeychainProvider.tsx
+
+SecuredKeychainProvider
+ A React context provider that manages secure retrieval of sensitive cryptographic information:
+
+## Main Responsibilities:
+- Provides methods to retrieve mnemonics and seeds
+- Implements a security workflow for accessing sensitive data
+- Handles different authentication scenarios
+
+## Key Methods
+
+-- getSecuredValue()
+Central method for retrieving sensitive information
+Handles different authentication scenarios
+Manages the retrieval process dynamically
+
+-- checkPassword()
+Validates user-entered password
+Retrieves secret if password is correct
+Manages lockout and error states
+Secure Retrieval Methods
+
+-- getMnemonic()
+Retrieves wallet recovery phrase
+Optional error handling
+Requires authentication if seed is protected
+
+-- getSeed()
+Retrieves cryptographic seed
+Converts hex string to ArrayBuffer
+Requires a rationale for access
+Supports optional error throwing
 
 
 Dec 12, 2024 - 12:09 IST
