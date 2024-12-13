@@ -84,3 +84,35 @@ Alternatives of storing keys in android keystore system
 - File Encryption
 - Cloud Storage
 - Native Encryption
+
+
+Dec 13, 2024 - 19:27 IST
+
+### expo-secure-store implementation and comparison with Android keystore system 
+
+https://docs.expo.dev/versions/latest/sdk/securestore/
+
+Expo SecureStore and Android Keystore System are both used for securely storing sensitive information, such as passwords or encryption keys, on mobile devices.
+However, they differ in how they interact with the underlying hardware and software to provide this security, as well as in their capabilities and the platforms they support.
+
+
+** why we can't use Expo SecureStore for cryptographic process:
+
+- Cross-platform solution for both iOS and Android.
+- On Android, it uses SharedPreferences with encryption and wraps the Android Keystore for encryption and decryption.
+- On iOS, it uses Keychain Services, which is Apple's secure storage system.
+- It does not guarantee hardware-backed security for key storage on Android devices—its security relies on the encryption methods provided by the Android OS.
+- Focuses on securely storing and retrieving simple data such as strings (passwords, tokens, etc.).
+- Does not provide advanced key management operations (e.g., key generation, signing, etc.) but can store keys safely in a database or secure storage after they are generated.
+- Best used for storing sensitive data (e.g., user credentials, tokens) where hardware-level security is not strictly necessary.
+- Suitable for apps where hardware-backed key storage is not a requirement, but encrypted storage is still needed for storing user data securely.
+- Does not guarantee hardware-backed storage for keys on Android. It typically uses software-backed encryption, although it can integrate with the Android Keystore for encryption on Android devices.
+
+
+** why we need to use Android Keystore system for cryptographic process:
+
+- Provides a secure hardware-backed container for storing cryptographic keys and performing cryptographic operations (like signing and encryption).
+- Hardware-backed security: On devices with a trusted execution environment (TEE) or a secure element (SE), the Android Keystore can store cryptographic keys in hardware, making them more secure from attacks such as rooting or physical extraction.
+- Keys are never exposed to the app, and cryptographic operations are done directly on the hardware 
+- Allows for generation, storage, and management of cryptographic keys directly within the Keystore, with operations like signing, encryption, decryption, and key attestation being supported.
+- Provides hardware-backed security for storing and using cryptographic keys.
