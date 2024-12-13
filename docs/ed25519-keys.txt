@@ -1,0 +1,14 @@
+Dec 13, 2024 17:10 IST
+
+Packages for creating ed25519 keys 
+1. react-native-libsodium (github star 32) expo support
+
+2. tweetnacl (20 million weekly downloads) (https://www.npmjs.com/package/tweetnacl) used for signature process (https://github.com/dchest/tweetnacl-js/blob/master/README.md#overview)
+
+
+3. noble-ed25519 (https://github.com/paulmillr/noble-ed25519) (157k weekly downloads) (https://www.npmjs.com/package/@noble/ed25519) pure JS implementation (github 425 star ) this is sister project of noble-curves (https://www.npmjs.com/package/@noble/curves) having weekly downloads of package 2.85 million
+
+4. libsodium-wrappers (1 million weekly downloads ) (https://www.npmjs.com/package/libsodium-wrappers) 
+
+5. expo-crypto (216k weekly downloads) supports to signing the key using ed25519 (https://nodejs.org/api/crypto.html#crypto_crypto_generatekeypairsync_type_options)
+
