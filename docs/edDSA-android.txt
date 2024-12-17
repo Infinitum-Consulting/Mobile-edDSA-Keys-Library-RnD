@@ -116,3 +116,157 @@ However, they differ in how they interact with the underlying hardware and softw
 - Keys are never exposed to the app, and cryptographic operations are done directly on the hardware 
 - Allows for generation, storage, and management of cryptographic keys directly within the Keystore, with operations like signing, encryption, decryption, and key attestation being supported.
 - Provides hardware-backed security for storing and using cryptographic keys.
+
+Dec 15, 2024 16:49 IST
+
+Expo secure store implementation, it's code sampless:
+
+1. installation of library as expo-secure-store for secureStore and ed25519,expo-crypto for generating keys: 
+
+import * as SecureStore from 'expo-secure-store';
+import * as ed25519 from '@noble/ed25519';
+import { getRandomBytes } from 'expo-crypto';
+import { sha512 } from '@noble/hashes/sha512';
+
+2. Storing keys as key-value pairs in secureStore and storing the signature 
+
+await SecureStore.setItemAsync('privateKey', privateKeyHex);
+await SecureStore.setItemAsync('publicKey', publicKeyHex);
+await SecureStore.setItemAsync('signature', signatureHex);
+
+3. Retrieve key stores by the name stored in store and getting the signature 
+  
+const storedPrivateKey = await SecureStore.getItemAsync('privateKey');
+const storedPublicKey = await SecureStore.getItemAsync('publicKey');
+const storedSignature = await SecureStore.getItemAsync('signature');
+
+4. signing the signature using ed25519 
+
+const privateKeyBuffer = getRandomBytes(32);
+const publicKeyBuffer = await ed25519.getPublicKey(privateKeyBuffer);
+
+const privateKeyHex = Buffer.from(privateKeyBuffer).toString('hex');
+const publicKeyHex = Buffer.from(publicKeyBuffer).toString('hex');
+
+      // Sign the message
+const messageBuffer = Buffer.from(message);
+const signatureBuffer = await ed25519.sign(messageBuffer, privateKeyBuffer);
+const signatureHex = Buffer.from(signatureBuffer).toString('hex');
+
+
+
+Dec 16, 2024 13:15 IST
+
+React Native research for getting the best security for using Android Keystore
+
+Understanding with using React-native-keychain (https://oblador.github.io/react-native-keychain/docs/secure-hardware-vs-software)
+
+Android uses two primary levels of security for cryptographic key storage and operations:
+
+1.Secure Hardware (StrongBox Keymaster)
+2.Secure Software (Trusted Execution Environment)
+
+What is Secure Hardware (StrongBox Keymaster)?
+Secure Hardware refers to a dedicated, physically isolated security chip (e.g., StrongBox). It is designed to provide the highest level of security for cryptographic key operations.
+
+Key Features of Secure Hardware:
+1. Hardware Isolation: The cryptographic keys are stored in a secure, tamper-resistant environment that is completely isolated from the main device's operating system and CPU.
+
+2. Hardware-backed Security: Cryptographic operations (like signing or encryption) are performed directly on the hardware, ensuring that the keys never leave the secure environment.
+
+3. Resistant to Physical Attacks: Designed to thwart physical attacks like voltage manipulation or side-channel attacks.
+
+4. StrongBox Support: Devices with Android 9 (API Level 28) or higher may include StrongBox, which enhances hardware-backed security.
+
+
+What is Secure Software (TEE)?
+Secure Software refers to the Trusted Execution Environment (TEE), a secure area of the device's main processor. It provides a sandboxed environment to store and process cryptographic keys securely, but it is not physically isolated like Secure Hardware.
+
+Key Features of TEE:
+1. Software Isolation: The TEE is a secure part of the main CPU that runs a separate, trusted OS to handle sensitive operations.
+
+2. Secure Key Storage: Cryptographic keys are stored in the TEE and are protected from the main operating system and apps.
+Widely Available: Most Android devices support TEE-based security, even if they lack dedicated Secure Hardware.
+
+## How Does It Affect react-native-keychain?
+When using react-native-keychain on Android, the library relies on the Android KeyStore system to store and manage cryptographic keys. The level of security provided depends on the device and its capabilities:
+
+1. StrongBox Enabled Devices: If a device supports StrongBox, react-native-keychain can store keys in the Secure Hardware, offering the highest level of security.
+
+2. TEE-Only Devices: If StrongBox is not available, the keys are stored in the TEE, which is still secure but less resistant to physical attacks.
+
+
+Dec 17, 2024 21:39 IST
+
+# Implementing Secure Key Storage with React Native Keychain
+
+1.Generate an ED25519 cryptographic key pair (using tweetnacl library).
+2.Store the keys securely in the Android Keystore using react-native-keychain.
+3.Retrieve the stored keys securely when needed.
+4.Delete the stored keys if required.
+
+
+# Technologies Used
+
+1. React Native: Framework for building mobile applications.
+2. react-native-keychain: Secure storage library for credentials.
+3. tweetnacl and tweetnacl-util: Cryptographic library for key generation and encoding.
+
+
+1. Setup and Installation
+
+npm install react-native-keychain tweetnacl tweetnacl-util
+
+2. Generating and Storing ED25519 Keys
+
+ const keyPair = nacl.sign.keyPair();
+
+    //  Encode keys to Base64 for safe storage
+    const publicKeyBase64 = naclUtil.encodeBase64(keyPair.publicKey);
+    const privateKeyBase64 = naclUtil.encodeBase64(keyPair.secretKey);
+
+    //  Store the private key securely using Keychain
+    await Keychain.setGenericPassword(publicKeyBase64, privateKeyBase64, {
+      accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+      securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE, // Enforce hardware-backed storage
+    });
+
+3. Retrieving Stored Keys
+
+const credentials = await Keychain.getGenericPassword();
+
+4. Deleting Stored Keys
+
+await Keychain.resetGenericPassword(); // Deletes credentials
+
+5. Verifying Security Level
+
+ const checkSecurityLevel = async () => {
+  const securityLevel = await Keychain.getSecurityLevel();
+  console.log('Security Level:', securityLevel);
+};
+
+SECURITY_LEVEL.SECURE_HARDWARE: Hardware-backed secure storage is used.
+SECURITY_LEVEL.SECURE_SOFTWARE: Software-based encryption is used.
+
+
+
+Dec 18, 2024 02:01 IST 
+
+Security of SECURE_SOFTWARE:
+
+Encryption within the app: Keys are encrypted and stored within the app's sandbox (the internal storage of the device). The encryption is software-based, which means that it relies on the operating system and app's security mechanisms to prevent unauthorized access.
+
+Vulnerabilities:
+
+a. Rooted/jailbroken devices: On rooted or jailbroken devices, attackers can gain access to the app's storage and potentially extract the cryptographic keys, because the OS security mechanisms are bypassed. The key storage is not isolated by hardware security, and attackers can use tools to access or dump the app's data.
+b. Physical access: If an attacker gains physical access to the device (e.g., by accessing the device directly or via malware), extracting the keys from software storage is possible, especially if the device is not properly secured (e.g., with a strong PIN or encryption).
+Limited by OS security: Software-based encryption relies on the operating system's security features, such as:
+
+App sandboxing, which isolates your app’s data from other apps.
+Encryption within the app that can be protected by a password or biometric (but only when the device is locked).
+
+
+Security of SECURE_HARDWARE:
+
+Hardware-backed security (e.g., using Android Keystore, Trusted Execution Environment, or a Secure Element) provides significantly stronger protection because the cryptographic keys never leave the secure hardware. The keys are stored in a tamper-resistant module that is not accessible even by the OS, and the key operations (e.g., signing) occur inside the secure hardware, making it much harder for an attacker to extract the keys.
