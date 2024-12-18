@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Button, Text, StyleSheet } from 'react-native';
-import { generateAndStoreKeys, retrieveKeys, deleteKeys } from './services/KeychainService';
+import { generateAndStoreKeys, retrieveKeys, deleteKeys,rotateKeys } from './services/KeychainService';
 import 'react-native-get-random-values';
 
 
@@ -21,12 +21,19 @@ const App = () => {
     await deleteKeys();
   };
 
+
+  const handleRotateKeys = async () => {
+    await rotateKeys();
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>ED25519 Key Management</Text>
       <Button title="Generate & Store Keys" onPress={handleGenerateKeys} />
       <Button title="Retrieve Keys" onPress={handleRetrieveKeys} />
+       <Button title="Rotate Keys" onPress={handleRotateKeys} />
       <Button title="Delete Keys" onPress={handleDeleteKeys} />
+
     </View>
   );
 };

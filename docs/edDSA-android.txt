@@ -250,7 +250,6 @@ SECURITY_LEVEL.SECURE_HARDWARE: Hardware-backed secure storage is used.
 SECURITY_LEVEL.SECURE_SOFTWARE: Software-based encryption is used.
 
 
-
 Dec 18, 2024 02:01 IST 
 
 Security of SECURE_SOFTWARE:
@@ -270,3 +269,42 @@ Encryption within the app that can be protected by a password or biometric (but 
 Security of SECURE_HARDWARE:
 
 Hardware-backed security (e.g., using Android Keystore, Trusted Execution Environment, or a Secure Element) provides significantly stronger protection because the cryptographic keys never leave the secure hardware. The keys are stored in a tamper-resistant module that is not accessible even by the OS, and the key operations (e.g., signing) occur inside the secure hardware, making it much harder for an attacker to extract the keys.
+
+
+Dec 18, 2024 13:06 IST 
+
+Rotate Keys in android keystore in react native environment:
+
+    const newKeyPair = nacl.sign.keyPair();
+
+    // 2. Encode keys to Base64 for safe storage
+    const newPublicKeyBase64 = naclUtil.encodeBase64(newKeyPair.publicKey);
+    const newPrivateKeyBase64 = naclUtil.encodeBase64(newKeyPair.secretKey);
+
+    // 3. Store the new private key securely using Keychain
+    await Keychain.setGenericPassword(newPublicKeyBase64, newPrivateKeyBase64, {
+      accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+      securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE, // Use hardware-backed storage
+    });
+
+    // 4. Optionally, delete the old key pair if it exists
+    await Keychain.resetGenericPassword();
+
+
+## Purpose of jubjub and ed25519:
+
+Ed25519:
+
+1. It is primarily used for digital signatures.
+2. Designed as part of the EdDSA (Edwards-curve Digital Signature Algorithm) for fast, secure, and efficient public-key signing.
+3. It is widely used in applications like SSH, TLS, and modern cryptographic protocols.
+4. Very fast for public key cryptography operations like signing and verification.
+5. Widely used in mainstream cryptography because of its efficiency on general-purpose CPUs.
+
+Jubjub:
+
+1. Designed specifically for zero-knowledge proofs and zk-SNARKs, such as those used in privacy-preserving blockchain technologies (e.g., Zcash).
+2. Optimized to work efficiently within the context of arithmetic circuits and zk-SNARKs.
+3. Jubjub is not typically used for digital signatures outside zero-knowledge systems.
+4. Optimized for use in zero-knowledge circuits where operations (like addition and scalar multiplication) must be cheap in terms of "circuit constraints" (low number of gates in arithmetic circuits).
+5. Not as fast as Ed25519 for traditional cryptographic operations but outperforms Ed25519 in the context of zero-knowledge proofs.
