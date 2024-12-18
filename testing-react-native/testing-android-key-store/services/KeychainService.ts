@@ -23,7 +23,33 @@ export const generateAndStoreKeys = async (): Promise<void> => {
   }
 };
 
-// Retrieve ED25519 key pair
+// Function to generate a new key pair, store it, and rotate keys
+export const rotateKeys = async (): Promise<void> => {
+  try {
+    // 1. Generate a new ED25519 key pair
+    const newKeyPair = nacl.sign.keyPair();
+
+    // 2. Encode keys to Base64 for safe storage
+    const newPublicKeyBase64 = naclUtil.encodeBase64(newKeyPair.publicKey);
+    const newPrivateKeyBase64 = naclUtil.encodeBase64(newKeyPair.secretKey);
+
+    // 3. Store the new private key securely using Keychain
+    await Keychain.setGenericPassword(newPublicKeyBase64, newPrivateKeyBase64, {
+      accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+      securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE, // Use hardware-backed storage
+    });
+
+    console.log('New ED25519 key pair generated and stored securely.');
+
+    // 4. Optionally, delete the old key pair if it exists
+    await Keychain.resetGenericPassword();
+    console.log('Old key pair deleted successfully.');
+  } catch (error) {
+    console.error('Error during key rotation:', error);
+  }
+};
+
+// Function to retrieve the current key pair
 export const retrieveKeys = async (): Promise<{
   publicKey: string;
   privateKey: string;
