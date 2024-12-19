@@ -1,55 +1,50 @@
 import * as Keychain from 'react-native-keychain';
 import nacl from 'tweetnacl';
 import * as naclUtil from 'tweetnacl-util';
+import {jubjub} from '@noble/curves/jubjub';
+import {randomBytes} from '@noble/hashes/utils';
+import {Buffer} from 'react-native-buffer';
 
-// Generate and store ED25519 key pair
-export const generateAndStoreKeys = async (): Promise<void> => {
+// ----- ED25519 Key Management -----
+export const generateAndStoreED25519Keys = async (): Promise<void> => {
   try {
     // Generate ED25519 key pair
     const keyPair = nacl.sign.keyPair();
 
-    // Convert keys to base64 for storage
+    // Convert to base64 for storage
     const publicKeyBase64 = naclUtil.encodeBase64(keyPair.publicKey);
     const privateKeyBase64 = naclUtil.encodeBase64(keyPair.secretKey);
 
-    // Store the private key securely using Keychain
-    await Keychain.setGenericPassword(publicKeyBase64, privateKeyBase64, {
-      accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY, // Keys accessible only when unlocked
-      securityLevel: Keychain.SECURITY_LEVEL.SECURE_SOFTWARE, // Prefer hardware-backed storage
-    });
+    // Store keys securely
+    await Keychain.setGenericPassword(publicKeyBase64, privateKeyBase64);
     console.log('ED25519 key pair generated and stored securely.');
   } catch (error) {
-    console.error('Error generating or storing ED25519 keys:', error);
+    console.error('Error generating ED25519 keys:', error);
   }
 };
 
-// Function to generate a new key pair, store it, and rotate keys
-export const rotateKeys = async (): Promise<void> => {
+// ----- BabyJubJub Key Management -----
+export const generateAndStoreJubJubKeys = async (): Promise<void> => {
   try {
-    // 1. Generate a new ED25519 key pair
-    const newKeyPair = nacl.sign.keyPair();
+    // Generate random private key (32 bytes)
+    const privateKey = randomBytes(32);
 
-    // 2. Encode keys to Base64 for safe storage
-    const newPublicKeyBase64 = naclUtil.encodeBase64(newKeyPair.publicKey);
-    const newPrivateKeyBase64 = naclUtil.encodeBase64(newKeyPair.secretKey);
+    // Derive the public key
+    const publicKey = jubjub.getPublicKey(privateKey);
 
-    // 3. Store the new private key securely using Keychain
-    await Keychain.setGenericPassword(newPublicKeyBase64, newPrivateKeyBase64, {
-      accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-      securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE, // Use hardware-backed storage
-    });
+    // Convert to hex strings for storage
+    const privateKeyHex = Buffer.from(privateKey).toString('hex');
+    const publicKeyHex = Buffer.from(publicKey).toString('hex');
 
-    console.log('New ED25519 key pair generated and stored securely.');
-
-    // 4. Optionally, delete the old key pair if it exists
-    await Keychain.resetGenericPassword();
-    console.log('Old key pair deleted successfully.');
+    // Store keys securely
+    await Keychain.setGenericPassword(publicKeyHex, privateKeyHex);
+    console.log('BabyJubJub key pair generated and stored securely.');
   } catch (error) {
-    console.error('Error during key rotation:', error);
+    console.error('Error generating JubJub keys:', error);
   }
 };
 
-// Function to retrieve the current key pair
+// ----- Retrieve Keys -----
 export const retrieveKeys = async (): Promise<{
   publicKey: string;
   privateKey: string;
@@ -57,13 +52,13 @@ export const retrieveKeys = async (): Promise<{
   try {
     const credentials = await Keychain.getGenericPassword();
     if (credentials) {
-      console.log('Keys retrieved from Keychain');
+      console.log('Keys retrieved successfully!');
       return {
         publicKey: credentials.username,
         privateKey: credentials.password,
       };
     } else {
-      console.log('No keys found in Keychain.');
+      console.log('No keys found.');
       return null;
     }
   } catch (error) {
@@ -72,12 +67,24 @@ export const retrieveKeys = async (): Promise<{
   }
 };
 
-// Delete stored keys
+// ----- Delete Keys -----
 export const deleteKeys = async (): Promise<void> => {
   try {
     await Keychain.resetGenericPassword();
-    console.log('Keys deleted successfully from Keychain.');
+    console.log('Keys deleted successfully.');
   } catch (error) {
     console.error('Error deleting keys:', error);
+  }
+};
+
+// ----- Rotate Keys -----
+export const rotateKeys = async (): Promise<void> => {
+  try {
+    console.log('Rotating keys...');
+    await deleteKeys(); // Delete old keys
+    await generateAndStoreED25519Keys(); // Generate new keys
+    console.log('Keys rotated successfully.');
+  } catch (error) {
+    console.error('Error rotating keys:', error);
   }
 };
