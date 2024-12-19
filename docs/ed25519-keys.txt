@@ -1,6 +1,6 @@
 Dec 13, 2024 17:10 IST
 
-Packages for creating ed25519 keys 
+### Packages for creating ed25519 keys 
 1. react-native-libsodium (github star 32) expo support
 
 2. tweetnacl (20 million weekly downloads) (https://www.npmjs.com/package/tweetnacl) used for signature process (https://github.com/dchest/tweetnacl-js/blob/master/README.md#overview)
@@ -10,3 +10,24 @@ Packages for creating ed25519 keys
 4. libsodium-wrappers (1 million weekly downloads ) (https://www.npmjs.com/package/libsodium-wrappers) 
 
 5. expo-crypto (216k weekly downloads) supports to signing the key using ed25519 (https://nodejs.org/api/crypto.html#crypto_crypto_generatekeypairsync_type_options)
+
+
+
+### libraries that supports babyjubjub curve creation 
+
+1. circomlib (https://github.com/iden3/circomlib):
+
+Includes pre-implemented BabyJubJub curve operations. It is primarily used with Node.js and ZK toolchains like snarkjs. React Native would require polyfills for Node modules.
+Install polyfills like react-native-crypto or react-native-nodeify to make Node.js libraries work with React Native.
+
+
+2. zk-kit/baby-jubjub(https://www.npmjs.com/package/@zk-kit/baby-jubjub)(791 weekly downloads on npm):
+
+Public and private key generation, signature verification, and hashing support.
+
+
+3. @noble/curves(https://www.npmjs.com/package/@noble/curves/v/1.0.0)
+
+Provides direct support for the JubJub curve, including key pair generation and public key derivation.
+A randomly generated 32-byte value using randomBytes from @noble/hashes/utils.
+Derived using jubjub.getPublicKey(privateKey).
