@@ -308,3 +308,29 @@ Jubjub:
 3. Jubjub is not typically used for digital signatures outside zero-knowledge systems.
 4. Optimized for use in zero-knowledge circuits where operations (like addition and scalar multiplication) must be cheap in terms of "circuit constraints" (low number of gates in arithmetic circuits).
 5. Not as fast as Ed25519 for traditional cryptographic operations but outperforms Ed25519 in the context of zero-knowledge proofs.
+
+
+
+Dec 19, 2024 09:52 IST
+
+libraries that supports babyjubjub curve creation 
+
+1.circomlib (https://github.com/iden3/circomlib):
+
+Includes pre-implemented BabyJubJub curve operations. It is primarily used with Node.js and ZK toolchains like snarkjs. React Native would require polyfills for Node modules.
+Install polyfills like react-native-crypto or react-native-nodeify to make Node.js libraries work with React Native.
+
+
+2. zk-kit/baby-jubjub(https://www.npmjs.com/package/@zk-kit/baby-jubjub)(791 weekly downloads on npm):
+
+Public and private key generation, signature verification, and hashing support.
+
+
+3. @noble/curves(https://www.npmjs.com/package/@noble/curves/v/1.0.0)
+
+Provides direct support for the JubJub curve, including key pair generation and public key derivation.
+A randomly generated 32-byte value using randomBytes from @noble/hashes/utils.
+Derived using jubjub.getPublicKey(privateKey).
+
+
+
