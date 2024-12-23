@@ -333,4 +333,95 @@ A randomly generated 32-byte value using randomBytes from @noble/hashes/utils.
 Derived using jubjub.getPublicKey(privateKey).
 
 
+#### Android Keystore Backup Analysis
 
+## Core Issue
+
+- Android Keystore keys are non-exportable by design
+- This creates a fundamental conflict with Android Auto Backup (enabled by default from Android 6.0+)
+- When encrypted data is backed up, it cannot be decrypted on a new device since the keys cannot be transferred
+
+## Auto Backup Scope
+
+# Automatically backs up:
+
+1. Shared preferences files
+2. Internal storage files
+3. Database files
+4. External storage files
+
+
+Enabled by default for apps targeting Android 6.0 (API 23) and above
+
+## Key Characteristics
+
+# Keys stored in Android Keystore are:
+
+- Secured in a hardware container
+- Non-exportable by design
+- Can only be used for cryptographic operations within the device
+
+
+
+### Available Solutions
+
+## Backend Storage (Recommended)
+
+1. Store encrypted data on remote server
+Pros: Secure, controlled environment
+Cons: Requires backend infrastructure
+
+
+## User Input-Based Encryption
+
+- Use user password/input as encryption key
+- Hash the input for better security
+- Can encrypt the password using Keystore
+Pros: High security
+Cons: Requires user action
+
+
+
+Dec 23, 2024  01:19 IST
+
+## the process of integrating biometric authentication using the react-native-keychain library in a React Native application.
+
+- Biometric authentication allows users to securely store and retrieve sensitive data, such as credentials, with the help of fingerprint or face recognition.
+
+async function saveCredentials(username, password) {
+  try {
+    await Keychain.setGenericPassword(username, password, {
+      accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY, // Allows any type of biometric authentication
+      securityLevel: Keychain.SECURITY_LEVEL.SECURE_SOFTWARE, // Ensures a secure level of protection
+    });
+    console.log('Credentials saved successfully!');
+  } catch (error) {
+    console.error('Error saving credentials:', error);
+  }
+}
+
+ACCESS_CONTROL.BIOMETRY_ANY: Ensures credentials are protected by any available biometric authentication 
+
+
+# Retrieving Credentials with Biometric Authentication
+
+async function getCredentials() {
+  try {
+    const credentials = await Keychain.getGenericPassword({
+      accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
+    });
+
+    if (credentials) {
+      console.log('Credentials retrieved successfully:', credentials);
+      // Use credentials.username and credentials.password
+    } else {
+      console.log('No credentials stored.');
+    }
+  } catch (error) {
+    console.error('Error retrieving credentials:', error);
+  }
+}
+
+
+# addition of below line for the android in AndroidManifest.xml
+<uses-permission android:name="android.permission.USE_BIOMETRIC" />
