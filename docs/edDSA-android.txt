@@ -422,6 +422,5 @@ async function getCredentials() {
   }
 }
 
-
 # addition of below line for the android in AndroidManifest.xml
 <uses-permission android:name="android.permission.USE_BIOMETRIC" />
