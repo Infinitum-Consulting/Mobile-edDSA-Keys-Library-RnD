@@ -855,3 +855,55 @@ class BabyJubjubKeyGenerator {
 }
 
 
+
+
+### ed25519 key storage in kotlin 
+
+ val keystore = java.security.KeyStore.getInstance("AndroidKeyStore")
+    keystore.load(null)
+
+    // Initialize KeyPairGenerator to generate Ed25519 keys
+    val keyPairGenerator = KeyPairGenerator.getInstance("Ed25519", "AndroidKeyStore")
+
+    // Define the key generation parameters
+    val keyGenParameterSpec = KeyGenParameterSpec.Builder("Ed25519Key", KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
+        .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
+        .build()
+
+    keyPairGenerator.initialize(keyGenParameterSpec)
+
+    // Generate the key pair and store in the Keystore
+    val keyPair: KeyPair = keyPairGenerator.generateKeyPair()
+
+
+-- getting public and private keys stored in keystore
+
+fun getPublicKeyFromKeystore(): PublicKey {
+    val keystore = java.security.KeyStore.getInstance("AndroidKeyStore")
+    keystore.load(null)
+
+    // Retrieve the public key from the Keystore
+    val publicKey: PublicKey = keystore.getCertificate("Ed25519Key").publicKey
+    return publicKey
+}
+
+fun getPrivateKeyFromKeystore(): PrivateKey {
+    val keystore = java.security.KeyStore.getInstance("AndroidKeyStore")
+    keystore.load(null)
+
+    // Retrieve the private key from the Keystore
+    val privateKey: PrivateKey = keystore.getKey("Ed25519Key", null) as PrivateKey
+    return privateKey
+}
+
+
+signing in with private key 
+
+fun signDataWithKeystore(privateKey: PrivateKey, data: String): String {
+    val signature = Signature.getInstance("Ed25519")
+    signature.initSign(privateKey)
+    signature.update(data.toByteArray())
+
+    val signedData = signature.sign()
+    return Base64.getEncoder().encodeToString(signedData)
+}
