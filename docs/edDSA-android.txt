@@ -591,3 +591,129 @@ Backup Management System
       throw error;
     }
   }
+
+
+
+// Kotlin Research 
+
+/**
+ * Utility class for generating Ed25519 cryptographic key pairs using the BouncyCastle library.
+ * Ed25519 is a modern digital signature system that offers strong security and good performance.
+ *
+ * Example usage:
+ * ```
+ * val keyGenerator = Ed25519KeyGenerator()
+ * val keyPair = keyGenerator.generateKeyPair()
+ * ```
+ */
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair
+import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator
+import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
+import org.bouncycastle.crypto.util.PrivateKeyInfoFactory
+import org.bouncycastle.crypto.util.SubjectPublicKeyInfoFactory
+import java.security.SecureRandom
+
+class Ed25519KeyGenerator {
+    /**
+     * Generates a new Ed25519 key pair.
+     *
+     * The generated keys are returned in ASN.1 encoded format, which is a standardized
+     * format suitable for storage and transmission.
+     *
+     * @return A [KeyPair] containing the generated private and public keys
+     * @throws RuntimeException if key generation fails
+     */
+    fun generateKeyPair(): KeyPair {
+        try {
+            // Create and initialize the key pair generator with secure random source
+            val keyPairGenerator = Ed25519KeyPairGenerator().apply {
+                init(Ed25519KeyGenerationParameters(SecureRandom()))
+            }
+            
+            // Generate the cryptographic key pair
+            val keyPair: AsymmetricCipherKeyPair = keyPairGenerator.generateKeyPair()
+            
+            // Extract the private and public key components
+            val privateKey = keyPair.private as Ed25519PrivateKeyParameters
+            val publicKey = keyPair.public as Ed25519PublicKeyParameters
+            
+            // Convert keys to standard ASN.1 format
+            val privateKeyInfo: PrivateKeyInfo = PrivateKeyInfoFactory.createPrivateKeyInfo(privateKey)
+            val publicKeyInfo: SubjectPublicKeyInfo = SubjectPublicKeyInfoFactory.createSubjectPublicKeyInfo(publicKey)
+            
+            // Return the encoded key pair
+            return KeyPair(
+                privateKey = privateKeyInfo.encoded,
+                publicKey = publicKeyInfo.encoded
+            )
+        } catch (e: Exception) {
+            throw RuntimeException("Failed to generate Ed25519 key pair", e)
+        }
+    }
+    
+    /**
+     * Data class representing an Ed25519 key pair.
+     *
+     * @property privateKey The private key in ASN.1 DER encoded format
+     * @property publicKey The public key in ASN.1 DER encoded format
+     */
+    data class KeyPair(
+        val privateKey: ByteArray,
+        val publicKey: ByteArray
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            
+            other as KeyPair
+            
+            if (!privateKey.contentEquals(other.privateKey)) return false
+            if (!publicKey.contentEquals(other.publicKey)) return false
+            
+            return true
+        }
+        
+        override fun hashCode(): Int {
+            var result = privateKey.contentHashCode()
+            result = 31 * result + publicKey.contentHashCode()
+            return result
+        }
+    }
+}
+
+// Example usage in Main.kt
+import java.util.Base64
+
+/**
+ * Example program demonstrating the generation of Ed25519 keys.
+ * This program generates a key pair and prints them in Base64 format.
+ */
+fun main() {
+    try {
+        // Create key generator instance
+        val keyGenerator = Ed25519KeyGenerator()
+        
+        // Generate a new key pair
+        val keyPair = keyGenerator.generateKeyPair()
+        
+        // Convert keys to Base64 for easy viewing/storage
+        val privateKeyBase64 = Base64.getEncoder().encodeToString(keyPair.privateKey)
+        val publicKeyBase64 = Base64.getEncoder().encodeToString(keyPair.publicKey)
+        
+        // Print the generated keys
+        println("Ed25519 Key Pair Generated Successfully")
+        println("=======================================")
+        println("Private key (Base64):")
+        println(privateKeyBase64)
+        println("\nPublic key (Base64):")
+        println(publicKeyBase64)
+        
+    } catch (e: Exception) {
+        println("Error generating keys: ${e.message}")
+        e.printStackTrace()
+    }
+}
