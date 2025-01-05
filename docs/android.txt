@@ -1,0 +1,17 @@
+Reference: 
+- https://developer.android.com/privacy-and-security/keystore
+- https://developer.android.com/security
+
+Security Features:
+- Android application sandbox
+- Credential Manager - https://developer.android.com/training/sign-in/passkeys, https://developer.android.com/training/sign-in/biometric-auth
+- Autofill framework - https://developer.android.com/guide/topics/text/autofill
+- The Play Integrity API helps you check that interactions and server requests are coming from your genuine app binary running on a genuine Android-powered device. By detecting potentially risky and fraudulent interactions, such as from tampered app versions and untrustworthy environments, your app's backend server can respond with appropriate actions to prevent attacks and reduce abuse.
+- Keychain vs Keystore - Keychain allows credential sharing and keystore provides a sandboxed environment for the application to store the credentials if they are not used by any other application.
+- Tink (https://github.com/tink-crypto/tink-java, https://developers.google.com/tink) - is a multi-language, cross-platform, open source library that provides secure and easy-to-use cryptographic APIs, and was created and is being maintained by cryptographers and security engineers at Google.
+- secrets-gradle-plugin is a gradle plugin for compile time known api keys.
+- https://www.iso.org/standard/27001, For most cases, a key rotation period between 90 days to 6 months should be adequate. 
+ 
+
+Consideration:
+- Be careful when writing to on-device logs. On Android, logs are a shared resource and are available to an application with the READ_LOGS permission.
