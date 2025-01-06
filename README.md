@@ -441,6 +441,9 @@ This research demonstrates how **iOS Keychain** and **Android Keystore** (with T
 - **Android Security Docs**  
   - [Android Keystore](https://developer.android.com/training/articles/keystore)  
   - [Play Integrity API](https://developer.android.com/google/play/integrity)
+  - [Credential Manager](https://developer.android.com/training/sign-in/passkeys)
+  - [Autofill framework](https://developer.android.com/guide/topics/text/autofill)
+  - [Tink](https://developers.google.com/tink)
 
 - **React Native Libraries**  
   - [react-native-keychain](https://github.com/oblador/react-native-keychain)  
