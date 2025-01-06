@@ -23,20 +23,21 @@ These solutions aim to enable robust cryptographic operations while preserving u
     - [Android: Keystore \& KeyChain API](#android-keystore--keychain-api)
     - [Software-Backed vs. Hardware-Backed Security](#software-backed-vs-hardware-backed-security)
   - [4. Findings on iOS Key Management](#4-findings-on-ios-key-management)
-  - [5. Implementation Options (React Native \& Native)](#5-implementation-options-react-native--native)
+  - [5. Findings on Android Key Management](#5-findings-on-android-key-management)
+  - [6. Implementation Options (React Native \& Native)](#5-implementation-options-react-native--native)
     - [Expo SecureStore](#expo-securestore)
     - [React Native Keychain](#react-native-keychain)
     - [Native Android (Kotlin/Java)](#native-android-kotlinjava)
-  - [6. Backup \& Recovery Strategies](#6-backup--recovery-strategies)
-  - [7. Code Implementation Examples](#7-code-implementation-examples)
+  - [7. Backup \& Recovery Strategies](#6-backup--recovery-strategies)
+  - [8. Code Implementation Examples](#7-code-implementation-examples)
     - [iOS: edDSA (Curve25519) Key Storage in Keychain](#ios-eddsa-curve25519-key-storage-in-keychain)
     - [Android: Ed25519 Key Pair (React Native)](#android-ed25519-key-pair-react-native)
     - [Biometric Authentication (React Native)](#biometric-authentication-react-native)
     - [Native Kotlin: Ed25519 Key in Android Keystore](#native-kotlin-ed25519-key-in-android-keystore)
-  - [8. Security Best Practices](#8-security-best-practices)
-  - [9. Future Work](#9-future-work)
-  - [10. Conclusion](#10-conclusion)
-  - [11. Additional References](#11-additional-references)
+  - [9. Security Best Practices](#8-security-best-practices)
+  - [10. Future Work](#9-future-work)
+  - [11. Conclusion](#10-conclusion)
+  - [12. Additional References](#11-additional-references)
 
 ---
 
@@ -122,7 +123,30 @@ Mobile devices increasingly serve as secure enclaves for cryptographic operation
 
 ---
 
-## 5. Implementation Options (React Native & Native)
+## 5. Findings on Android Key Management
+
+### Key Storage Options
+- **Android Keystore System**: Provides secure storage for cryptographic keys. Allows storing Curve25519 private keys if using custom implementations. Android Keystore natively supports ECDSA with P256, P384, and P521.
+- **Hardware-Backed Security**: If the device includes a hardware-backed keystore (e.g., Trusted Execution Environment or Secure Element), it can securely generate and store keys.
+- **Key Storage Alternatives**: For applications needing edDSA on Curve25519, keys can be securely stored in encrypted SharedPreferences or custom storage solutions, combined with the Android Keystore for encryption.
+
+### Supported Cryptographic Algorithms
+- **Curve25519**: Not natively supported in the Android Keystore. However, libraries like [Bouncy Castle](https://www.bouncycastle.org/) or [Conscrypt](https://conscrypt.org/) provide support for edDSA signatures and key exchange on Curve25519.
+- **P256, P384, P521**: Supported by the Android Keystore for ECDSA.
+- **HPKE (Hybrid Public Key Encryption)**: Not natively supported but can be implemented via third-party libraries.
+- **AES and RSA**: Widely supported by the Android Keystore for encryption and key wrapping.
+
+### Key Management Features
+- **Device-Specific Isolation**: Keys stored in the Android Keystore are tied to the device and cannot be extracted, even by root access (on devices with proper hardware-backed security).
+- **Biometric Authentication**: Can restrict key access to biometric authentication (e.g., fingerprint or facial recognition) using the `setUserAuthenticationRequired` flag in the `KeyGenParameterSpec`.
+- **Secure Backup**: Android Keystore does not allow exporting private keys, so they cannot be backed up directly. Applications requiring key backup must implement custom encrypted backup strategies, such as encrypting keys using a passphrase-derived key and securely storing them.
+
+### Notes
+- Unlike iOS, where the Secure Enclave does not support Curve25519, Android allows flexibility by enabling the use of third-party libraries for Curve25519 support. However, it lacks a built-in solution in the Keystore for ed25519.
+- Applications using Curve25519-based cryptographic operations must manage key storage securely, as improper implementations may compromise key confidentiality.
+
+
+## 6. Implementation Options (React Native & Native)
 
 ### Expo SecureStore
 
@@ -144,7 +168,7 @@ Mobile devices increasingly serve as secure enclaves for cryptographic operation
 
 ---
 
-## 6. Backup & Recovery Strategies
+## 7. Backup & Recovery Strategies
 
 1. **Avoid Android Auto Backup**  
    - Keys in Keystore are non-exportable, so data encrypted with them cannot be restored on a different device.
@@ -162,7 +186,7 @@ Mobile devices increasingly serve as secure enclaves for cryptographic operation
 
 ---
 
-## 7. Code Implementation Examples
+## 8. Code Implementation Examples
 
 ### iOS: edDSA (Curve25519) Key Storage in Keychain
 
@@ -361,7 +385,7 @@ fun signData(privateKey: PrivateKey, data: String): ByteArray {
 
 ---
 
-## 8. Security Best Practices
+## 9. Security Best Practices
 
 1. **Disable Logging**  
    - Never log private keys or sensitive data.
@@ -383,7 +407,7 @@ fun signData(privateKey: PrivateKey, data: String): ByteArray {
 
 ---
 
-## 9. Future Work
+## 10. Future Work
 
 1. **Android Integration**  
    - Further refine passkey usage with Android Credential Manager.  
@@ -402,13 +426,13 @@ fun signData(privateKey: PrivateKey, data: String): ByteArray {
 
 ---
 
-## 10. Conclusion
+## 11. Conclusion
 
 This research demonstrates how **iOS Keychain** and **Android Keystore** (with TEE/StrongBox) can securely manage edDSA keys for privacy-preserving applications. By leveraging hardware-backed features where possible, integrating biometrics or passkeys for user-friendly access, and employing robust backup strategies, we can achieve strong cryptographic assurances. Future work aims to unify these strategies across both platforms, ensuring standards compliance while remaining flexible and user-centric.
 
 ---
 
-## 11. Additional References
+## 12. Additional References
 
 - **iOS Security Docs**  
   - [Apple Keychain Services](https://developer.apple.com/documentation/security/keychain_services)  
