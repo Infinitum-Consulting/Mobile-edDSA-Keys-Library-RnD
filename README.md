@@ -1,12 +1,13 @@
 # edDSA Key Management on Mobile Devices (iOS & Android)
 
-This README consolidates research and implementation details for securely managing **edDSA keys** (commonly on **Curve25519**) on both iOS and Android platforms. It covers:
+This README consolidates research and implementation details for securely managing **edDSA keys** (commonly on **Curve25519**) on both iOS and Android platforms. It also explores **BabyJubJub**—a curve specifically optimized for zero-knowledge proof (ZKP) systems. It covers:
 
 1. Key generation  
 2. Secure storage (Keychain, Secure Enclave on iOS, Android Keystore/TEE)  
 3. Key rotation and recovery strategies  
 4. Integration of passkeys/biometric prompts  
 5. Cloud backup solutions  
+6. Challenges around **BabyJubJub** key storage, given limited native OS library support
 
 These solutions aim to enable robust cryptographic operations while preserving user privacy and meeting enterprise-grade security requirements—especially relevant in **self-sovereign identity (SSI)**, **zero-knowledge proofs (ZKPs)**, and other privacy-preserving systems.
 
@@ -485,6 +486,7 @@ This research demonstrates how **iOS Keychain** and **Android Keystore** (with T
   - [@noble/curves (jubjub)](https://github.com/paulmillr/noble-curves)
 
 - **Cryptographic Libraries**  
+  - [zk-kit](https://github.com/privacy-scaling-explorations/zk-kit)  
   - [tweetnacl](https://www.npmjs.com/package/tweetnacl)  
   - [@noble/ed25519](https://www.npmjs.com/package/@noble/ed25519)  
   - [CryptoKit (Swift)](https://developer.apple.com/documentation/cryptokit)
