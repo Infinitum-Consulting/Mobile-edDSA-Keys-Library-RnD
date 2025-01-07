@@ -24,20 +24,21 @@ These solutions aim to enable robust cryptographic operations while preserving u
     - [Software-Backed vs. Hardware-Backed Security](#software-backed-vs-hardware-backed-security)
   - [4. Findings on iOS Key Management](#4-findings-on-ios-key-management)
   - [5. Findings on Android Key Management](#5-findings-on-android-key-management)
-  - [6. Implementation Options (React Native \& Native)](#5-implementation-options-react-native--native)
+  - [6. Challenges with BabyJubJub for ZKPs](#6-challenges-with-babyjubjub-for-zkps)
+  - [7. Implementation Options (React Native \& Native)](#7-implementation-options-react-native--native)
     - [Expo SecureStore](#expo-securestore)
     - [React Native Keychain](#react-native-keychain)
     - [Native Android (Kotlin/Java)](#native-android-kotlinjava)
-  - [7. Backup \& Recovery Strategies](#6-backup--recovery-strategies)
-  - [8. Code Implementation Examples](#7-code-implementation-examples)
+  - [8. Backup \& Recovery Strategies](#8-backup--recovery-strategies)
+  - [9. Code Implementation Examples](#9-code-implementation-examples)
     - [iOS: edDSA (Curve25519) Key Storage in Keychain](#ios-eddsa-curve25519-key-storage-in-keychain)
     - [Android: Ed25519 Key Pair (React Native)](#android-ed25519-key-pair-react-native)
     - [Biometric Authentication (React Native)](#biometric-authentication-react-native)
     - [Native Kotlin: Ed25519 Key in Android Keystore](#native-kotlin-ed25519-key-in-android-keystore)
-  - [9. Security Best Practices](#8-security-best-practices)
-  - [10. Future Work](#9-future-work)
-  - [11. Conclusion](#10-conclusion)
-  - [12. Additional References](#11-additional-references)
+  - [10. Security Best Practices](#10-security-best-practices)
+  - [11. Future Work](#11-future-work)
+  - [12. Conclusion](#12-conclusion)
+  - [13. Additional References](#13-additional-references)
 
 ---
 
@@ -145,8 +146,37 @@ Mobile devices increasingly serve as secure enclaves for cryptographic operation
 - Unlike iOS, where the Secure Enclave does not support Curve25519, Android allows flexibility by enabling the use of third-party libraries for Curve25519 support. However, it lacks a built-in solution in the Keystore for ed25519.
 - Applications using Curve25519-based cryptographic operations must manage key storage securely, as improper implementations may compromise key confidentiality.
 
+---
 
-## 6. Implementation Options (React Native & Native)
+## 6. Challenges with BabyJubJub for ZKPs
+
+**BabyJubJub** is a twisted Edwards curve optimized for zero-knowledge proofs (ZKPs). It’s widely used in **SNARK** frameworks (e.g., circom, iden3) for applications like **zk-SNARK**-based identity or privacy systems.
+
+1. **Lack of Native OS Library Support**  
+   - Neither **iOS** nor **Android** provides built-in support for BabyJubJub in their hardware modules (Secure Enclave / StrongBox).  
+   - This means you cannot generate or store BabyJubJub keys in a **hardware-backed** manner using the default OS-level crypto APIs.
+
+2. **Reliance on External Libraries**  
+   - To generate and manage BabyJubJub keys, developers typically rely on:
+     - **circomlib** or **zk-kit/baby-jubjub** (JavaScript/Node.js, requiring RN polyfills)  
+     - **@noble/curves** with the `jubjub` submodule  
+   - On mobile, bridging or using these libraries can be complex, especially when you need secure key storage.
+
+3. **Software-Only Storage**  
+   - Keys typically must be stored as **software-backed** (e.g., in Keychain on iOS or Keystore in “SECURE_SOFTWARE” mode on Android).  
+   - Leaves keys more vulnerable than hardware-backed solutions because the OS kernel (or a rooted device) might access them.
+
+4. **Potential Workarounds**  
+   - Store the **BabyJubJub** private key in an **encrypted** form in Keychain/Keystore.  
+   - Decrypt it only in memory when you need to perform zero-knowledge operations.  
+   - Consider passphrase-based encryption for an added layer of security.
+
+5. **Future Outlook**  
+   - As ZKPs gain traction, Apple or Google may eventually add hardware-level support for BabyJubJub or other specialized ZK curves. Until then, developers must rely on software-based approaches.
+
+---
+
+## 7. Implementation Options (React Native & Native)
 
 ### Expo SecureStore
 
@@ -168,7 +198,7 @@ Mobile devices increasingly serve as secure enclaves for cryptographic operation
 
 ---
 
-## 7. Backup & Recovery Strategies
+## 8. Backup & Recovery Strategies
 
 1. **Avoid Android Auto Backup**  
    - Keys in Keystore are non-exportable, so data encrypted with them cannot be restored on a different device.
@@ -186,7 +216,7 @@ Mobile devices increasingly serve as secure enclaves for cryptographic operation
 
 ---
 
-## 8. Code Implementation Examples
+## 9. Code Implementation Examples
 
 ### iOS: edDSA (Curve25519) Key Storage in Keychain
 
@@ -385,7 +415,7 @@ fun signData(privateKey: PrivateKey, data: String): ByteArray {
 
 ---
 
-## 9. Security Best Practices
+## 10. Security Best Practices
 
 1. **Disable Logging**  
    - Never log private keys or sensitive data.
@@ -407,7 +437,7 @@ fun signData(privateKey: PrivateKey, data: String): ByteArray {
 
 ---
 
-## 10. Future Work
+## 11. Future Work
 
 1. **Android Integration**  
    - Further refine passkey usage with Android Credential Manager.  
@@ -426,13 +456,13 @@ fun signData(privateKey: PrivateKey, data: String): ByteArray {
 
 ---
 
-## 11. Conclusion
+## 12. Conclusion
 
 This research demonstrates how **iOS Keychain** and **Android Keystore** (with TEE/StrongBox) can securely manage edDSA keys for privacy-preserving applications. By leveraging hardware-backed features where possible, integrating biometrics or passkeys for user-friendly access, and employing robust backup strategies, we can achieve strong cryptographic assurances. Future work aims to unify these strategies across both platforms, ensuring standards compliance while remaining flexible and user-centric.
 
 ---
 
-## 12. Additional References
+## 13. Additional References
 
 - **iOS Security Docs**  
   - [Apple Keychain Services](https://developer.apple.com/documentation/security/keychain_services)  
@@ -449,8 +479,12 @@ This research demonstrates how **iOS Keychain** and **Android Keystore** (with T
   - [react-native-keychain](https://github.com/oblador/react-native-keychain)  
   - [expo-secure-store](https://docs.expo.dev/versions/latest/sdk/securestore/)
 
+- **ZK & BabyJubJub Libraries**  
+  - [circomlib (iden3)](https://github.com/iden3/circomlib)  
+  - [zk-kit/baby-jubjub](https://www.npmjs.com/package/@zk-kit/baby-jubjub)  
+  - [@noble/curves (jubjub)](https://github.com/paulmillr/noble-curves)
+
 - **Cryptographic Libraries**  
-  - [zk-kit](https://github.com/privacy-scaling-explorations/zk-kit)  
   - [tweetnacl](https://www.npmjs.com/package/tweetnacl)  
   - [@noble/ed25519](https://www.npmjs.com/package/@noble/ed25519)  
   - [CryptoKit (Swift)](https://developer.apple.com/documentation/cryptokit)
