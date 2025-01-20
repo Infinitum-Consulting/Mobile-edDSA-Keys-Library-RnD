@@ -11,7 +11,7 @@ import SwiftUI
 struct testing_babyjubjub_implementationsApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            BabyJubJubDemoView()
         }
     }
 }

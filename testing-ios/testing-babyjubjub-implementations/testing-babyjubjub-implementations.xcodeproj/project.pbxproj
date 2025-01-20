@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D32D891D2D3EF77900015415 /* BigInt in Frameworks */ = {isa = PBXBuildFile; productRef = D32D891C2D3EF77900015415 /* BigInt */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		D32D89072D3EE9EF00015415 /* testing-babyjubjub-implementations.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "testing-babyjubjub-implementations.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D32D891D2D3EF77900015415 /* BigInt in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = "testing-babyjubjub-implementations";
 			packageProductDependencies = (
+				D32D891C2D3EF77900015415 /* BigInt */,
 			);
 			productName = "testing-babyjubjub-implementations";
 			productReference = D32D89072D3EE9EF00015415 /* testing-babyjubjub-implementations.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = D32D88FE2D3EE9EF00015415;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D32D891B2D3EF77900015415 /* XCRemoteSwiftPackageReference "BigInt" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D32D89082D3EE9EF00015415 /* Products */;
 			projectDirPath = "";
@@ -324,6 +333,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D32D891B2D3EF77900015415 /* XCRemoteSwiftPackageReference "BigInt" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/attaswift/BigInt";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D32D891C2D3EF77900015415 /* BigInt */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D32D891B2D3EF77900015415 /* XCRemoteSwiftPackageReference "BigInt" */;
+			productName = BigInt;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D32D88FF2D3EE9EF00015415 /* Project object */;
 }
