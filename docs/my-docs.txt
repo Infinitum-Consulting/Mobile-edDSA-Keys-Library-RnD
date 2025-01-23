@@ -35,12 +35,3 @@ Notes:
 Recommendations:
 - Maci:
     - Add Invalided Keys Module in MACI for supporting Key Rotation.
-
-Tasks for me in mind:
-- Try out the key storage on IOS using Keychain
-- Try out the key storage on IOS using Secure Enclave
-- Try out the key storage on Android using Android Keystore System
-- Try out the key storage on Android using Secure Enclave
-- Have a meeting with ctrl3 for understanding how can we implement Key Rotation in MACI
-- Have a meeting with cedoor for understanding how we can implement key rotation in Semaphores and in general what would be needed in the mobile app for it to happen.
-- Idea: What about separating the public key which is used by dapps like maci with the key used to sign transactions (like votes on maci). For example, we could generate two private keys, and get the public keys for both of these, and then use the public key of the first in the dapp (maci), and then either create a smart contract, that keeps track of the owner key of this public key, i.e. the second key, or use a server with the signature of the first key marking second key as owner, and then discarding the private key of the first key, and using the second key for signing transactions, now the second key can sign a transaction marking a third key as the owner of the first key, at the time of key rotation, and then discard the second key.  (Note: Do we need nonce here as the second key might sign something after being invalidated)
